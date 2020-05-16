@@ -1,2 +1,0 @@
-# agiliumtrade-node.js-client
-
