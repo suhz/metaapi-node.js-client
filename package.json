@@ -1,0 +1,54 @@
+{
+  "author": {
+    "name": "Agilium Labs LLC",
+    "email": "agiliumtrade@agiliumtrade.ai"
+  },
+  "contributors": [
+    {
+      "name": "Roman Kisilenko",
+      "email": "roman.kisilenko@agiliumlabs.com"
+    }
+  ],
+  "bugs": {
+    "email": "agiliumtrade@agiliumtrade.ai",
+    "url": "https://github.com/agiliumtrade-ai/metaapi-node.js-client/issues"
+  },
+  "keywords": [
+    "metaapi.cloud",
+    "client",
+    "sdk"
+  ],
+  "name": "metaapi.cloud-sdk",
+  "description": "metaapi.cloud client implementation in node.js",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agiliumtrade-ai/metaapi-node.js-client.git"
+  },
+  "version": "1.0.0",
+  "dependencies": {
+    "babel-runtime": "~6.26.0",
+    "request": "~2.87.0",
+    "request-promise-any": "~1.0.5",
+    "socket.io-client": "~2.3.0"
+  },
+  "devDependencies": {
+    "babel-cli": "~6.26.0",
+    "babel-plugin-transform-runtime": "~6.23.0",
+    "babel-preset-env": "~1.7.0",
+    "babel-preset-es2015": "~6.24.1",
+    "babel-register": "~6.26.0",
+    "eslint": "~4.15.0",
+    "eslint-plugin-mocha": "~4.11.0",
+    "mocha": "~5.2.0",
+    "should": "~13.2.1",
+    "sinon": "~5.1.1",
+    "socket.io": "~2.1.1"
+  },
+  "scripts": {
+    "test": "mocha --require babel-register lib/*/*.spec.es6 lib/*.spec.es6",
+    "lint": "eslint --ext es6 ./app",
+    "build": "rm -rf dist; npx babel lib --out-dir dist --source-maps inline --ignore lib/templates;"
+  },
+  "main": "dist/metaapi.js"
+}
