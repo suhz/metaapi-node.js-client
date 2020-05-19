@@ -28,6 +28,7 @@
   "version": "1.0.0",
   "dependencies": {
     "babel-runtime": "~6.26.0",
+    "randomstring": "~1.1.5",
     "request": "~2.87.0",
     "request-promise-any": "~1.0.5",
     "socket.io-client": "~2.3.0"

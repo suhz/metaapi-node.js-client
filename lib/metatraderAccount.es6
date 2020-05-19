@@ -1,6 +1,6 @@
 'use strict';
 
-import TimeoutError from './timeoutError';
+import TimeoutError from './clients/timeoutError';
 
 /**
  * Implements a MetaTrader account entity
