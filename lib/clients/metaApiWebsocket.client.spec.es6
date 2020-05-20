@@ -1,6 +1,7 @@
 'use strict';
 
 import should from 'should';
+import sinon from 'sinon';
 import MetaApiWebsocketClient from './metaApiWebsocket.client';
 import Server from 'socket.io';
 import NotConnectedError from "./notConnectedError";
@@ -16,10 +17,12 @@ describe('MetaApiWebsocketClient', () => {
   let io;
   let server;
   let client;
+  let sandbox;
 
   before(() => {
     client = new MetaApiWebsocketClient('token');
     client.url = 'http://localhost:6784';
+    sandbox = sinon.createSandbox();
   });
 
   beforeEach(async () => {
@@ -35,6 +38,7 @@ describe('MetaApiWebsocketClient', () => {
   });
 
   afterEach(async () => {
+    sandbox.restore();
     let resolve;
     let promise = new Promise(res => resolve = res);
     client.close();
@@ -77,6 +81,7 @@ describe('MetaApiWebsocketClient', () => {
       symbol: 'GBPUSD',
       magic: 1000,
       time: new Date('2020-04-15T02:45:06.521Z'),
+      updateTime: new Date('2020-04-15T02:45:06.521Z'),
       openPrice: 1.26101,
       currentPrice: 1.24883,
       currentTickValue: 1,
@@ -108,6 +113,7 @@ describe('MetaApiWebsocketClient', () => {
       symbol: 'GBPUSD',
       magic: 1000,
       time: new Date('2020-04-15T02:45:06.521Z'),
+      updateTime: new Date('2020-04-15T02:45:06.521Z'),
       openPrice: 1.26101,
       currentPrice: 1.24883,
       currentTickValue: 1,
@@ -512,6 +518,371 @@ describe('MetaApiWebsocketClient', () => {
       } catch (err) {
         err.name.should.equal('InternalError');
       }
+    });
+
+  });
+
+  describe('connection status synchronization', () => {
+
+    afterEach(() => {
+      client.removeAllListeners();
+    });
+
+    it('should process authenticated synchronization event', async () => {
+      let listener = {
+        onConnected: () => {}
+      };
+      sandbox.stub(listener, 'onConnected').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'authenticated', accountId: 'accountId'});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onConnected);
+    });
+
+    it('should process broker connection status event', async () => {
+      let listener = {
+        onBrokerConnectionStatusChanged: () => {}
+      };
+      sandbox.stub(listener, 'onBrokerConnectionStatusChanged').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'status', accountId: 'accountId', connected: true});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onBrokerConnectionStatusChanged, true);
+    });
+
+    it('should process disconnected synchronization event', async () => {
+      let listener = {
+        onDisconnected: () => {}
+      };
+      sandbox.stub(listener, 'onDisconnected').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'disconnected', accountId: 'accountId'});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onDisconnected);
+    });
+
+  });
+
+  describe('terminal state synchronization', () => {
+
+    afterEach(() => {
+      client.removeAllListeners();
+    });
+
+    /**
+     * @test {MetaApiWebsocketClient#synchronize}
+     */
+    it('should synchronize with MetaTrader terminal', async () => {
+      let requestReceived = false;
+      server.on('request', data => {
+        if (data.type === 'synchronize' && data.accountId === 'accountId' &&
+          data.startingHistoryOrderTime === '2020-01-01T00:00:00.000Z' &&
+          data.startingDealTime === '2020-01-02T00:00:00.000Z') {
+          requestReceived = true;
+          server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId});
+        }
+      });
+      await client.synchronize('accountId', new Date('2020-01-01T00:00:00.000Z'), new Date('2020-01-02T00:00:00.000Z'));
+      requestReceived.should.be.true();
+    });
+
+    it('should synchronize account information', async () => {
+      let accountInformation = {
+        broker: 'True ECN Trading Ltd',
+        currency: 'USD',
+        server: 'ICMarketsSC-Demo',
+        balance: 7319.9,
+        equity: 7306.649913200001,
+        margin: 184.1,
+        freeMargin: 7120.22,
+        leverage: 100,
+        marginLevel: 3967.58283542
+      };
+      let listener = {
+        onAccountInformationUpdated: () => {}
+      };
+      sandbox.stub(listener, 'onAccountInformationUpdated').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'accountInformation', accountId: 'accountId', accountInformation});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onAccountInformationUpdated, accountInformation);
+    });
+
+    it('should synchronize positions', async () => {
+      let positions = [{
+        id: '46214692',
+        type: 'POSITION_TYPE_BUY',
+        symbol: 'GBPUSD',
+        magic: 1000,
+        time: new Date('2020-04-15T02:45:06.521Z'),
+        updateTime: new Date('2020-04-15T02:45:06.521Z'),
+        openPrice: 1.26101,
+        currentPrice: 1.24883,
+        currentTickValue: 1,
+        volume: 0.07,
+        swap: 0,
+        profit: -85.25999999999966,
+        commission: -0.25,
+        clientId: 'TE_GBPUSD_7hyINWqAlE',
+        stopLoss: 1.17721,
+        unrealizedProfit: -85.25999999999901,
+        realizedProfit: -6.536993168992922e-13
+      }];
+      let listener = {
+        onPositionUpdated: () => {}
+      };
+      sandbox.stub(listener, 'onPositionUpdated').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'positions', accountId: 'accountId', positions});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onPositionUpdated, positions[0]);
+    });
+
+    it('should synchronize orders', async () => {
+      let orders = [{
+        id: '46871284',
+        type: 'ORDER_TYPE_BUY_LIMIT',
+        state: 'ORDER_STATE_PLACED',
+        symbol: 'AUDNZD',
+        magic: 123456,
+        platform: 'mt5',
+        time: new Date('2020-04-20T08:38:58.270Z'),
+        openPrice: 1.03,
+        currentPrice: 1.05206,
+        volume: 0.01,
+        currentVolume: 0.01,
+        comment: 'COMMENT2'
+      }];
+      let listener = {
+        onOrderUpdated: () => {}
+      };
+      sandbox.stub(listener, 'onOrderUpdated').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'orders', accountId: 'accountId', orders});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onOrderUpdated, orders[0]);
+    });
+
+    it('should synchronize history orders', async () => {
+      let historyOrders = [{
+        clientId: 'TE_GBPUSD_7hyINWqAlE',
+        currentPrice: 1.261,
+        currentVolume: 0,
+        doneTime: new Date('2020-04-15T02:45:06.521Z'),
+        id: '46214692',
+        magic: 1000,
+        platform: 'mt5',
+        positionId: '46214692',
+        state: 'ORDER_STATE_FILLED',
+        symbol: 'GBPUSD',
+        time: new Date('2020-04-15T02:45:06.260Z'),
+        type: 'ORDER_TYPE_BUY',
+        volume: 0.07
+      }];
+      let listener = {
+        onHistoryOrderAdded: () => {}
+      };
+      sandbox.stub(listener, 'onHistoryOrderAdded').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'historyOrders', accountId: 'accountId', historyOrders});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onHistoryOrderAdded, historyOrders[0]);
+    });
+
+    it('should synchronize deals', async () => {
+      let deals = [{
+        clientId: 'TE_GBPUSD_7hyINWqAlE',
+        commission: -0.25,
+        entryType: 'DEAL_ENTRY_IN',
+        id: '33230099',
+        magic: 1000,
+        platform: 'mt5',
+        orderId: '46214692',
+        positionId: '46214692',
+        price: 1.26101,
+        profit: 0,
+        swap: 0,
+        symbol: 'GBPUSD',
+        time: new Date('2020-04-15T02:45:06.521Z'),
+        type: 'DEAL_TYPE_BUY',
+        volume: 0.07
+      }];
+      let listener = {
+        onDealAdded: () => {}
+      };
+      sandbox.stub(listener, 'onDealAdded').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'deals', accountId: 'accountId', deals});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onDealAdded, deals[0]);
+    });
+
+    it('should process synchronization updates', async () => {
+      let update = {
+        accountInformation: {
+          broker: 'True ECN Trading Ltd',
+          currency: 'USD',
+          server: 'ICMarketsSC-Demo',
+          balance: 7319.9,
+          equity: 7306.649913200001,
+          margin: 184.1,
+          freeMargin: 7120.22,
+          leverage: 100,
+          marginLevel: 3967.58283542
+        },
+        updatedPositions: [{
+          id: '46214692',
+          type: 'POSITION_TYPE_BUY',
+          symbol: 'GBPUSD',
+          magic: 1000,
+          time: new Date('2020-04-15T02:45:06.521Z'),
+          updateTime: new Date('2020-04-15T02:45:06.521Z'),
+          openPrice: 1.26101,
+          currentPrice: 1.24883,
+          currentTickValue: 1,
+          volume: 0.07,
+          swap: 0,
+          profit: -85.25999999999966,
+          commission: -0.25,
+          clientId: 'TE_GBPUSD_7hyINWqAlE',
+          stopLoss: 1.17721,
+          unrealizedProfit: -85.25999999999901,
+          realizedProfit: -6.536993168992922e-13
+        }],
+        removedPositionIds: ['1234'],
+        updatedOrders: [{
+          id: '46871284',
+          type: 'ORDER_TYPE_BUY_LIMIT',
+          state: 'ORDER_STATE_PLACED',
+          symbol: 'AUDNZD',
+          magic: 123456,
+          platform: 'mt5',
+          time: new Date('2020-04-20T08:38:58.270Z'),
+          openPrice: 1.03,
+          currentPrice: 1.05206,
+          volume: 0.01,
+          currentVolume: 0.01,
+          comment: 'COMMENT2'
+        }],
+        completedOrderIds: ['2345'],
+        historyOrders: [{
+          clientId: 'TE_GBPUSD_7hyINWqAlE',
+          currentPrice: 1.261,
+          currentVolume: 0,
+          doneTime: new Date('2020-04-15T02:45:06.521Z'),
+          id: '46214692',
+          magic: 1000,
+          platform: 'mt5',
+          positionId: '46214692',
+          state: 'ORDER_STATE_FILLED',
+          symbol: 'GBPUSD',
+          time: new Date('2020-04-15T02:45:06.260Z'),
+          type: 'ORDER_TYPE_BUY',
+          volume: 0.07
+        }],
+        deals: [{
+          clientId: 'TE_GBPUSD_7hyINWqAlE',
+          commission: -0.25,
+          entryType: 'DEAL_ENTRY_IN',
+          id: '33230099',
+          magic: 1000,
+          platform: 'mt5',
+          orderId: '46214692',
+          positionId: '46214692',
+          price: 1.26101,
+          profit: 0,
+          swap: 0,
+          symbol: 'GBPUSD',
+          time: new Date('2020-04-15T02:45:06.521Z'),
+          type: 'DEAL_TYPE_BUY',
+          volume: 0.07
+        }]
+      };
+      let listener = {
+        onAccountInformationUpdated: () => {},
+        onPositionUpdated: () => {},
+        onPositionRemoved: () => {},
+        onOrderUpdated: () => {},
+        onOrderCompleted: () => {},
+        onHistoryOrderAdded: () => {},
+        onDealAdded: () => {}
+      };
+      sandbox.stub(listener, 'onAccountInformationUpdated').resolves();
+      sandbox.stub(listener, 'onPositionUpdated').resolves();
+      sandbox.stub(listener, 'onPositionRemoved').resolves();
+      sandbox.stub(listener, 'onOrderUpdated').resolves();
+      sandbox.stub(listener, 'onOrderCompleted').resolves();
+      sandbox.stub(listener, 'onHistoryOrderAdded').resolves();
+      sandbox.stub(listener, 'onDealAdded').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', Object.assign({type: 'update', accountId: 'accountId'}, update));
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onAccountInformationUpdated, update.accountInformation);
+      sinon.assert.calledWith(listener.onPositionUpdated, update.updatedPositions[0]);
+      sinon.assert.calledWith(listener.onPositionRemoved, update.removedPositionIds[0]);
+      sinon.assert.calledWith(listener.onOrderUpdated, update.updatedOrders[0]);
+      sinon.assert.calledWith(listener.onOrderCompleted, update.completedOrderIds[0]);
+      sinon.assert.calledWith(listener.onHistoryOrderAdded, update.historyOrders[0]);
+      sinon.assert.calledWith(listener.onDealAdded, update.deals[0]);
+    });
+
+  });
+
+  describe('market data synchronization', () => {
+
+    afterEach(() => {
+      client.removeAllListeners();
+    });
+
+    /**
+     * @test {MetaApiWebsocketClient#subscribeToMarketData}
+     */
+    it('should subscribe to market data with MetaTrader terminal', async () => {
+      let requestReceived = false;
+      server.on('request', data => {
+        if (data.type === 'subscribeToMarketData' && data.accountId === 'accountId' && data.symbol === 'EURUSD') {
+          requestReceived = true;
+          server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId});
+        }
+      });
+      await client.subscribeToMarketData('accountId', 'EURUSD');
+      requestReceived.should.be.true();
+    });
+
+    it('should synchronize symbol specifications', async () => {
+      let specifications = [{
+        symbol: 'EURUSD',
+        tickSize: 0.00001,
+        minVolume: 0.01,
+        maxVolume: 200,
+        volumeStep: 0.01
+      }];
+      let listener = {
+        onSymbolSpecificationUpdated: () => {}
+      };
+      sandbox.stub(listener, 'onSymbolSpecificationUpdated').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'specifications', accountId: 'accountId', specifications});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onSymbolSpecificationUpdated, specifications[0]);
+    });
+
+    it('should synchronize symbol prices', async () => {
+      let prices = [{
+        symbol: 'AUDNZD',
+        bid: 1.05916,
+        ask: 1.05927,
+        profitTickValue: 0.602,
+        lossTickValue: 0.60203
+      }];
+      let listener = {
+        onSymbolPriceUpdated: () => {}
+      };
+      sandbox.stub(listener, 'onSymbolPriceUpdated').resolves();
+      client.addSynchronizationListener('accountId', listener);
+      server.emit('synchronization', {type: 'prices', accountId: 'accountId', prices});
+      await new Promise(res => setTimeout(res, 50));
+      sinon.assert.calledWith(listener.onSymbolPriceUpdated, prices[0]);
     });
 
   });

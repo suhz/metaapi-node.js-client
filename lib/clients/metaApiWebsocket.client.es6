@@ -21,6 +21,7 @@ export default class MetaApiWebsocketClient {
     this._url = `https://mt-provisioning-api-v1.${domain}`;
     this._token = token;
     this._requestResolves = {};
+    this._synchronizationListeners = {};
   }
 
   /**
@@ -50,7 +51,7 @@ export default class MetaApiWebsocketClient {
         path: '/ws',
         reconnection: true,
         reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
+        reconnectionDelayMax : 5000,
         reconnectionAttempts: Infinity
       });
       this._socket.on('connect', () => {
@@ -96,6 +97,10 @@ export default class MetaApiWebsocketClient {
         let requestResolve = (this._requestResolves[data.requestId] || {resolve: () => {}, reject: () => {}});
         delete this._requestResolves[data.requestId];
         requestResolve.reject(this._convertError(data));
+      });
+      this._socket.on('synchronization', async data => {
+        this._convertIsoTimeToDate(data);
+        await this._processSynchronizationPacket(data);
       });
       return result;
     }
@@ -430,6 +435,66 @@ export default class MetaApiWebsocketClient {
     return this._rpcRequest(accountId, {type: 'reconnect'});
   }
 
+  /**
+   * Requests the terminal to start synchronization process. Use it if user synchronization mode is set to user for the
+   * account (see https://metaapi.cloud/docs/client/websocket/synchronizing/synchronize/).
+   * @param {String} accountId id of the MetaTrader account to synchronize
+   * @param {Date} startingHistoryOrderTime from what date to start synchronizing history orders from. If not specified,
+   * the entire order history will be downloaded.
+   * @param {Date} startingDealTime from what date to start deal synchronization from. If not specified, then all
+   * history deals will be downloaded.
+   * @returns {Promise} promise which resolves when synchronization started
+   */
+  synchronize(accountId, startingHistoryOrderTime, startingDealTime) {
+    return this._rpcRequest(accountId, {type: 'synchronize', startingHistoryOrderTime, startingDealTime});
+  }
+
+  /**
+   * Subscribes on market data of specified symbol (see
+   * https://metaapi.cloud/docs/client/websocket/marketDataStreaming/subscribeToMarketData/).
+   * @param {String} accountId id of the MetaTrader account to synchronize
+   * @param {String} symbol symbol (e.g. currency pair or an index)
+   * @returns {Promise} promise which resolves when subscription request was processed
+   */
+  subscribeToMarketData(accountId, symbol) {
+    return this._rpcRequest(accountId, {type: 'subscribeToMarketData', symbol});
+  }
+
+  /**
+   * Adds synchronization listener for specific account
+   * @param {String} accountId account id
+   * @param {SynchronizationListener} listener synchronization listener to add
+   */
+  addSynchronizationListener(accountId, listener) {
+    let listeners = this._synchronizationListeners[accountId];
+    if (!listeners) {
+      listeners = [];
+      this._synchronizationListeners[accountId] = listeners;
+    }
+    listeners.push(listener);
+  }
+
+  /**
+   * Removes synchronization listener for specific account
+   * @param {String} accountId account id
+   * @param {SynchronizationListener} listener synchronization listener to remove
+   */
+  removeSynchronizationListener(accountId, listener) {
+    let listeners = this._synchronizationListeners[accountId];
+    if (!listeners) {
+      listeners = [];
+    }
+    listeners = listeners.filter(l => l !== listener);
+    this._synchronizationListeners[accountId] = listeners;
+  }
+
+  /**
+   * Removes all listeners. Intended for use in unit tests.
+   */
+  removeAllListeners() {
+    this._synchronizationListeners = {};
+  }
+
   async _reconnect() {
     while(!this._socket.connected && !this._socket.connecting && this._connected) {
       await this._tryReconnect();
@@ -438,7 +503,9 @@ export default class MetaApiWebsocketClient {
 
   _tryReconnect() {
     return new Promise((resolve) => setTimeout(() => {
-      this._socket.connect();
+      if (!this._socket.connected && !this._socket.connecting && this._connected) {
+        this._socket.connect();
+      }
       resolve();
     }, 1000));
   }
@@ -488,6 +555,134 @@ export default class MetaApiWebsocketClient {
           this._convertIsoTimeToDate(value);
         }
       }
+    }
+  }
+
+  /**
+   * MetaTrader symbol specification. Contains symbol specification (see
+   * https://metaapi.cloud/docs/client/models/metatraderSymbolSpecification/)
+   * @typedef {Object} MetatraderSymbolSpecification
+   * @property {String} symbol symbol (e.g. a currency pair or an index)
+   * @property {Number} tickSize tick size
+   * @property {Number} minVolume minimum order volume for the symbol
+   * @property {Number} maxVolume maximum order volume for the symbol
+   * @property {Number} volumeStep order volume step for the symbol
+   */
+
+  /**
+   * MetaTrader symbol price. Contains current price for a symbol (see
+   * https://metaapi.cloud/docs/client/models/metatraderSymbolPrice/)
+   * @typedef {Object} MetatraderSymbolPrice
+   * @property {String} symbol symbol (e.g. a currency pair or an index)
+   * @property {Number} bid bid price
+   * @property {Number} ask ask price
+   * @property {Number} profitTickValue tick value for a profitable position
+   * @property {Number} lossTickValue tick value for a loosing position
+   */
+
+  async _processSynchronizationPacket(data) {
+    try {
+      if (data.type === 'authenticated') {
+        for (let listener of this._synchronizationListeners[data.accountId]) {
+          await listener.onConnected();
+        }
+      } else if (data.type === 'disconnected') {
+        for (let listener of this._synchronizationListeners[data.accountId]) {
+          await listener.onDisconnected();
+        }
+      } else if (data.type === 'accountInformation') {
+        if (data.accountInformation) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onAccountInformationUpdated(data.accountInformation);
+          }
+        }
+      } else if (data.type === 'deals') {
+        for (let deal of (data.deals || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onDealAdded(deal);
+          }
+        }
+      } else if (data.type === 'orders') {
+        for (let order of (data.orders || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onOrderUpdated(order);
+          }
+        }
+      } else if (data.type === 'historyOrders') {
+        for (let historyOrder of (data.historyOrders || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onHistoryOrderAdded(historyOrder);
+          }
+        }
+      } else if (data.type === 'positions') {
+        for (let position of (data.positions || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onPositionUpdated(position);
+          }
+        }
+      } else if (data.type === 'update') {
+        if (data.accountInformation) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onAccountInformationUpdated(data.accountInformation);
+          }
+        }
+        for (let position of (data.updatedPositions || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onPositionUpdated(position);
+          }
+        }
+        for (let positionId of (data.removedPositionIds || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onPositionRemoved(positionId);
+          }
+        }
+        for (let order of (data.updatedOrders || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onOrderUpdated(order);
+          }
+        }
+        for (let orderId of (data.completedOrderIds || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onOrderCompleted(orderId);
+          }
+        }
+        for (let historyOrder of (data.historyOrders || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onHistoryOrderAdded(historyOrder);
+          }
+        }
+        for (let deal of (data.deals || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onDealAdded(deal);
+          }
+        }
+      } else if (data.type === 'dealSynchronizationFinished') {
+        for (let listener of this._synchronizationListeners[data.accountId]) {
+          await listener.onDealSynchronizationFinished();
+        }
+      } else if (data.type === 'orderSynchronizationFinished') {
+        for (let listener of this._synchronizationListeners[data.accountId]) {
+          await listener.onOrderSynchronizationFinished();
+        }
+      } else if (data.type === 'status') {
+        for (let listener of this._synchronizationListeners[data.accountId]) {
+          await listener.onBrokerConnectionStatusChanged(!!data.connected);
+        }
+      } else if (data.type === 'specifications') {
+        for (let specification of (data.specifications || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onSymbolSpecificationUpdated(specification);
+          }
+        }
+      } else if (data.type === 'prices') {
+        for (let price of (data.prices || [])) {
+          for (let listener of this._synchronizationListeners[data.accountId]) {
+            await listener.onSymbolPriceUpdated(price);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to process incoming synchronization packet', err);
     }
   }
 
