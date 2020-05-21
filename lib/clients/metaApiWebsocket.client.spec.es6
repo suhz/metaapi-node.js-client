@@ -4,8 +4,8 @@ import should from 'should';
 import sinon from 'sinon';
 import MetaApiWebsocketClient from './metaApiWebsocket.client';
 import Server from 'socket.io';
-import NotConnectedError from "./notConnectedError";
-import {InternalError} from "./errorHandler";
+import NotConnectedError from './notConnectedError';
+import {InternalError} from './errorHandler';
 
 const metaapiApiUrl = 'https://mt-client-api-v1.agiliumtrade.agiliumtrade.ai';
 
@@ -403,7 +403,7 @@ describe('MetaApiWebsocketClient', () => {
     let response = {
       error: 10009,
       description: 'TRADE_RETCODE_DONE',
-      orderId: 46870472
+      orderId: '46870472'
     };
     server.on('request', data => {
       data.trade.should.match(trade);

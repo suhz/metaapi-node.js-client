@@ -1,6 +1,7 @@
 'use strict';
 
 import TimeoutError from './clients/timeoutError';
+import MetaApiConnection from './metaApiConnection';
 
 /**
  * Implements a MetaTrader account entity
@@ -11,10 +12,12 @@ export default class MetatraderAccount {
    * Constructs a MetaTrader account entity
    * @param {MetatraderAccountDto} data MetaTrader account data
    * @param {MetatraderAccountClient} metatraderAccountClient MetaTrader account REST API client
+   * @param {MetaApiWebsocketClient} metaApiWebsocketClient MetaApi websocket client
    */
-  constructor(data, metatraderAccountClient) {
+  constructor(data, metatraderAccountClient, metaApiWebsocketClient) {
     this._data = data;
     this._metatraderAccountClient = metatraderAccountClient;
+    this._metaApiWebsocketClient = metaApiWebsocketClient;
   }
 
   /**
@@ -244,6 +247,15 @@ export default class MetatraderAccount {
     if (this.connectionStatus !== 'CONNECTED') {
       throw new TimeoutError('Timed out waiting for account ' + this.id + ' to connect to the broker');
     }
+  }
+
+  /**
+   * Connects to MetaApi
+   * @param {HistoryStorage} optional history storage
+   * @returns {MetaApiConnection} MetaApi connection
+   */
+  connect(historyStorage) {
+    return new MetaApiConnection(this._metaApiWebsocketClient, this, historyStorage);
   }
 
   _delay(timeoutInMilliseconds) {

@@ -55,6 +55,7 @@ export default class MetaApiWebsocketClient {
         reconnectionAttempts: Infinity
       });
       this._socket.on('connect', () => {
+        // eslint-disable-next-line no-console
         console.log('[' + (new Date()).toISOString() + '] MetaApi websocket client connected to the MetaApi server');
         if (!resolved) {
           resolved = true;
@@ -65,6 +66,7 @@ export default class MetaApiWebsocketClient {
         }
       });
       this._socket.on('connect_error', (err) => {
+        // eslint-disable-next-line no-console
         console.log('[' + (new Date()).toISOString() + '] MetaApi websocket client connection error', err);
         if (!resolved) {
           resolved = true;
@@ -72,6 +74,7 @@ export default class MetaApiWebsocketClient {
         }
       });
       this._socket.on('connect_timeout', (timeout) => {
+        // eslint-disable-next-line no-console
         console.log('[' + (new Date()).toISOString() + '] MetaApi websocket client connection timeout');
         if (!resolved) {
           resolved = true;
@@ -79,11 +82,13 @@ export default class MetaApiWebsocketClient {
         }
       });
       this._socket.on('disconnect', async (reason) => {
+        // eslint-disable-next-line no-console
         console.log('[' + (new Date()).toISOString() + '] MetaApi websocket client disconnected from the MetaApi ' +
           'server because of ' + reason);
         await this._reconnect();
       });
       this._socket.on('error', async (error) => {
+        // eslint-disable-next-line no-console
         console.error('[' + (new Date()).toISOString() + '] MetaApi websocket client error', error);
         await this._reconnect();
       });
@@ -265,13 +270,13 @@ export default class MetaApiWebsocketClient {
    * and thus search results may be incomplete
    */
 
-   /**
-    * Returns the history of completed orders for a specific ticket number (see
-    * https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByTicket/).
-    * @param {String} accountId id of the MetaTrader account to return information for
-    * @param {String} ticket ticket number (order id)
-    * @returns {Promise<MetatraderHistoryOrders>} promise resolving with request results containing history orders found
-    */
+  /**
+   * Returns the history of completed orders for a specific ticket number (see
+   * https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByTicket/).
+   * @param {String} accountId id of the MetaTrader account to return information for
+   * @param {String} ticket ticket number (order id)
+   * @returns {Promise<MetatraderHistoryOrders>} promise resolving with request results containing history orders found
+   */
   async getHistoryOrdersByTicket(accountId, ticket) {
     let response = await this._rpcRequest(accountId, {type: 'getHistoryOrdersByTicket', ticket});
     return {
@@ -580,108 +585,205 @@ export default class MetaApiWebsocketClient {
    * @property {Number} lossTickValue tick value for a loosing position
    */
 
+  // eslint-disable-next-line complexity,max-statements
   async _processSynchronizationPacket(data) {
     try {
       if (data.type === 'authenticated') {
         for (let listener of this._synchronizationListeners[data.accountId]) {
-          await listener.onConnected();
+          try {
+            await listener.onConnected();
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to notify listener about connected event', err);
+          }
         }
       } else if (data.type === 'disconnected') {
         for (let listener of this._synchronizationListeners[data.accountId]) {
-          await listener.onDisconnected();
+          try {
+            await listener.onDisconnected();
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to notify listener about disconnected event', err);
+          }
         }
       } else if (data.type === 'accountInformation') {
         if (data.accountInformation) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onAccountInformationUpdated(data.accountInformation);
+            try {
+              await listener.onAccountInformationUpdated(data.accountInformation);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about accountInformation event', err);
+            }
           }
         }
       } else if (data.type === 'deals') {
         for (let deal of (data.deals || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onDealAdded(deal);
+            try {
+              await listener.onDealAdded(deal);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about deals event', err);
+            }
           }
         }
       } else if (data.type === 'orders') {
         for (let order of (data.orders || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onOrderUpdated(order);
+            try {
+              await listener.onOrderUpdated(order);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about orders event', err);
+            }
           }
         }
       } else if (data.type === 'historyOrders') {
         for (let historyOrder of (data.historyOrders || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onHistoryOrderAdded(historyOrder);
+            try {
+              await listener.onHistoryOrderAdded(historyOrder);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about historyOrders event', err);
+            }
           }
         }
       } else if (data.type === 'positions') {
         for (let position of (data.positions || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onPositionUpdated(position);
+            try {
+              await listener.onPositionUpdated(position);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about positions event', err);
+            }
           }
         }
       } else if (data.type === 'update') {
         if (data.accountInformation) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onAccountInformationUpdated(data.accountInformation);
+            try {
+              await listener.onAccountInformationUpdated(data.accountInformation);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
         for (let position of (data.updatedPositions || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onPositionUpdated(position);
+            try {
+              await listener.onPositionUpdated(position);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
         for (let positionId of (data.removedPositionIds || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onPositionRemoved(positionId);
+            try {
+              await listener.onPositionRemoved(positionId);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
         for (let order of (data.updatedOrders || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onOrderUpdated(order);
+            try {
+              await listener.onOrderUpdated(order);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
         for (let orderId of (data.completedOrderIds || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onOrderCompleted(orderId);
+            try {
+              await listener.onOrderCompleted(orderId);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
         for (let historyOrder of (data.historyOrders || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onHistoryOrderAdded(historyOrder);
+            try {
+              await listener.onHistoryOrderAdded(historyOrder);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
         for (let deal of (data.deals || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onDealAdded(deal);
+            try {
+              await listener.onDealAdded(deal);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about update event', err);
+            }
           }
         }
       } else if (data.type === 'dealSynchronizationFinished') {
         for (let listener of this._synchronizationListeners[data.accountId]) {
-          await listener.onDealSynchronizationFinished();
+          try {
+            await listener.onDealSynchronizationFinished();
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to notify listener about dealSynchronizationFinished event', err);
+          }
         }
       } else if (data.type === 'orderSynchronizationFinished') {
         for (let listener of this._synchronizationListeners[data.accountId]) {
-          await listener.onOrderSynchronizationFinished();
+          try {
+            await listener.onOrderSynchronizationFinished();
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to notify listener about orderSynchronizationFinished event', err);
+          }
         }
       } else if (data.type === 'status') {
         for (let listener of this._synchronizationListeners[data.accountId]) {
-          await listener.onBrokerConnectionStatusChanged(!!data.connected);
+          try {
+            await listener.onBrokerConnectionStatusChanged(!!data.connected);
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to notify listener about brokerConnectionStatusChanged event', err);
+          }
         }
       } else if (data.type === 'specifications') {
         for (let specification of (data.specifications || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onSymbolSpecificationUpdated(specification);
+            try {
+              await listener.onSymbolSpecificationUpdated(specification);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about specifications event', err);
+            }
           }
         }
       } else if (data.type === 'prices') {
         for (let price of (data.prices || [])) {
           for (let listener of this._synchronizationListeners[data.accountId]) {
-            await listener.onSymbolPriceUpdated(price);
+            try {
+              await listener.onSymbolPriceUpdated(price);
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to notify listener about prices event', err);
+            }
           }
         }
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Failed to process incoming synchronization packet', err);
     }
   }

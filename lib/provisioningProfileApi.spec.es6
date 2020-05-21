@@ -24,11 +24,11 @@ describe('ProvisioningProfileApi', () => {
   before(() => {
     api = new ProvisioningProfileApi(client);
     sandbox = sinon.sandbox.create();
-  })
+  });
 
   afterEach(() => {
     sandbox.restore();
-  })
+  });
 
   /**
    * @test {ProvisioningProfileApi#getProvisioningProfiles}

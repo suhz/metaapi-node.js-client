@@ -5,6 +5,7 @@ import sinon from 'sinon';
 import MetatraderAccountApi from './metatraderAccountApi';
 import MetatraderAccount from './metatraderAccount';
 import {NotFoundError} from './clients/errorHandler';
+import MetaApiConnection from './metaApiConnection';
 
 /**
  * @test {MetatraderAccountApi}
@@ -23,15 +24,18 @@ describe('MetatraderAccountApi', () => {
     undeployAccount: () => {},
     redeployAccount: () => {}
   };
+  let metaApiWebsocketClient = {
+    addSynchronizationListener: () => {}
+  };
 
   before(() => {
-    api = new MetatraderAccountApi(client);
+    api = new MetatraderAccountApi(client, metaApiWebsocketClient);
     sandbox = sinon.sandbox.create();
-  })
+  });
 
   afterEach(() => {
     sandbox.restore();
-  })
+  });
 
   /**
    * @test {MetatraderAccountApi#getAccounts}
@@ -175,33 +179,33 @@ describe('MetatraderAccountApi', () => {
   it('should remove MT account', async () => {
     sandbox.stub(client, 'getAccount')
       .onFirstCall().resolves({
-      _id: 'id',
-      login: '50194988',
-      name: 'mt5a',
-      server: 'ICMarketsSC-Demo',
-      provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
-      magic: '123456',
-      timeConverter: 'icmarkets',
-      application: 'MetaApi',
-      connectionStatus: 'CONNECTED',
-      state: 'DEPLOYED',
-      synchronizationMode: 'automatic',
-      type: 'cloud'
-    })
+        _id: 'id',
+        login: '50194988',
+        name: 'mt5a',
+        server: 'ICMarketsSC-Demo',
+        provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
+        magic: '123456',
+        timeConverter: 'icmarkets',
+        application: 'MetaApi',
+        connectionStatus: 'CONNECTED',
+        state: 'DEPLOYED',
+        synchronizationMode: 'automatic',
+        type: 'cloud'
+      })
       .onSecondCall().resolves({
-      _id: 'id',
-      login: '50194988',
-      name: 'mt5a',
-      server: 'ICMarketsSC-Demo',
-      provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
-      magic: '123456',
-      timeConverter: 'icmarkets',
-      application: 'MetaApi',
-      connectionStatus: 'CONNECTED',
-      state: 'DELETING',
-      synchronizationMode: 'automatic',
-      type: 'cloud'
-    });
+        _id: 'id',
+        login: '50194988',
+        name: 'mt5a',
+        server: 'ICMarketsSC-Demo',
+        provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
+        magic: '123456',
+        timeConverter: 'icmarkets',
+        application: 'MetaApi',
+        connectionStatus: 'CONNECTED',
+        state: 'DELETING',
+        synchronizationMode: 'automatic',
+        type: 'cloud'
+      });
     sandbox.stub(client, 'deleteAccount').resolves();
     let account = await api.getAccount('id');
     await account.remove();
@@ -259,33 +263,33 @@ describe('MetatraderAccountApi', () => {
   it('should undeploy MT account', async () => {
     sandbox.stub(client, 'getAccount')
       .onFirstCall().resolves({
-      _id: 'id',
-      login: '50194988',
-      name: 'mt5a',
-      server: 'ICMarketsSC-Demo',
-      provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
-      magic: '123456',
-      timeConverter: 'icmarkets',
-      application: 'MetaApi',
-      connectionStatus: 'DISCONNECTED',
-      state: 'DEPLOYED',
-      synchronizationMode: 'automatic',
-      type: 'cloud'
-    })
+        _id: 'id',
+        login: '50194988',
+        name: 'mt5a',
+        server: 'ICMarketsSC-Demo',
+        provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
+        magic: '123456',
+        timeConverter: 'icmarkets',
+        application: 'MetaApi',
+        connectionStatus: 'DISCONNECTED',
+        state: 'DEPLOYED',
+        synchronizationMode: 'automatic',
+        type: 'cloud'
+      })
       .onSecondCall().resolves({
-      _id: 'id',
-      login: '50194988',
-      name: 'mt5a',
-      server: 'ICMarketsSC-Demo',
-      provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
-      magic: '123456',
-      timeConverter: 'icmarkets',
-      application: 'MetaApi',
-      connectionStatus: 'CONNECTED',
-      state: 'UNDEPLOYING',
-      synchronizationMode: 'automatic',
-      type: 'cloud'
-    });
+        _id: 'id',
+        login: '50194988',
+        name: 'mt5a',
+        server: 'ICMarketsSC-Demo',
+        provisioningProfileId: 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
+        magic: '123456',
+        timeConverter: 'icmarkets',
+        application: 'MetaApi',
+        connectionStatus: 'CONNECTED',
+        state: 'UNDEPLOYING',
+        synchronizationMode: 'automatic',
+        type: 'cloud'
+      });
     sandbox.stub(client, 'undeployAccount').resolves();
     let account = await api.getAccount('id');
     await account.undeploy();
@@ -628,6 +632,20 @@ describe('MetatraderAccountApi', () => {
       sinon.assert.calledWith(client.getAccount, 'id');
     });
 
+  });
+
+  /**
+   * @test {MetatraderAccount#connect}
+   */
+  it('should retrieve MT accounts', async () => {
+    sandbox.stub(metaApiWebsocketClient, 'addSynchronizationListener').returns();
+    sandbox.stub(client, 'getAccount').resolves({_id: 'id', synchronizationMode: 'user'});
+    let account = await api.getAccount();
+    let storage = {};
+    let connection = account.connect(storage);
+    (connection instanceof MetaApiConnection).should.be.true();
+    connection.historyStorage.should.equal(storage);
+    sinon.assert.calledWith(metaApiWebsocketClient.addSynchronizationListener, 'id', storage);
   });
 
 });

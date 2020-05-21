@@ -48,8 +48,8 @@
   },
   "scripts": {
     "test": "mocha --require babel-register lib/*/*.spec.es6 lib/*.spec.es6",
-    "lint": "eslint --ext es6 ./app",
+    "lint": "eslint --ext es6 ./lib",
     "build": "rm -rf dist; npx babel lib --out-dir dist --source-maps inline --ignore lib/templates;"
   },
-  "main": "dist/metaapi.js"
+  "main": "dist/index.js"
 }
