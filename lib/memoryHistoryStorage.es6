@@ -54,7 +54,24 @@ export default class MemoryHistoryStorage extends HistoryStorage {
    * @return {Promise} promise which resolves when the asynchronous event is processed
    */
   onHistoryOrderAdded(historyOrder) {
-    this._historyOrders.push(historyOrder);
+    let insertIndex = 0;
+    let replacementIndex = -1;
+    this._historyOrders.forEach((order, index) => {
+      if ((order.doneTime || new Date(0)).getTime() <= (historyOrder.doneTime || new Date(0)).getTime()) {
+        if (order.id <= historyOrder.id) {
+          if (order.doneTime === historyOrder.doneTime && order.id === historyOrder.id &&
+            order.type === historyOrder.type) {
+            replacementIndex = index;
+          }
+          insertIndex = index + 1;
+        }
+      }
+    });
+    if (replacementIndex !== -1) {
+      this._historyOrders[replacementIndex] = historyOrder;
+    } else {
+      this._historyOrders.splice(insertIndex, 0, historyOrder);
+    }
   }
 
   /**
@@ -63,7 +80,23 @@ export default class MemoryHistoryStorage extends HistoryStorage {
    * @return {Promise} promise which resolves when the asynchronous event is processed
    */
   onDealAdded(deal) {
-    this._deals.push(deal);
+    let insertIndex = 0;
+    let replacementIndex = -1;
+    this._deals.forEach((d, index) => {
+      if ((d.time || new Date(0)).getTime() <= (deal.time || new Date(0)).getTime()) {
+        if (d.id <= deal.id) {
+          if (d.time === deal.time && d.id === deal.id && d.entryType === deal.entryType) {
+            replacementIndex = index;
+          }
+          insertIndex = index + 1;
+        }
+      }
+    });
+    if (replacementIndex !== -1) {
+      this._deals[replacementIndex] = deal;
+    } else {
+      this._deals.splice(insertIndex, 0, deal);
+    }
   }
 
   /**

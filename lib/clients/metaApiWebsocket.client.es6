@@ -122,6 +122,7 @@ export default class MetaApiWebsocketClient {
         requestResolve.reject(new Error('MetaApi connection closed'));
       }
       this._requestResolves = {};
+      this._synchronizationListeners = {};
     }
   }
 
@@ -457,12 +458,22 @@ export default class MetaApiWebsocketClient {
   /**
    * Subscribes on market data of specified symbol (see
    * https://metaapi.cloud/docs/client/websocket/marketDataStreaming/subscribeToMarketData/).
-   * @param {String} accountId id of the MetaTrader account to synchronize
+   * @param {String} accountId id of the MetaTrader account
    * @param {String} symbol symbol (e.g. currency pair or an index)
    * @returns {Promise} promise which resolves when subscription request was processed
    */
   subscribeToMarketData(accountId, symbol) {
     return this._rpcRequest(accountId, {type: 'subscribeToMarketData', symbol});
+  }
+
+  /**
+   * Subscribes to specific MetaTrader account (see
+   * https://metaapi.cloud/docs/client/websocket/api/subscribe/).
+   * @param {String} accountId id of the MetaTrader account to subscribe to
+   * @returns {Promise} promise which resolves when subscription request was processed
+   */
+  subscribe(accountId) {
+    return this._rpcRequest(accountId, {type: 'subscribe'});
   }
 
   /**

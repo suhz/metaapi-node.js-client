@@ -43,20 +43,28 @@ describe('MemoryHistoryStorage', () => {
    * @test {MemoryHistoryStorage#deals}
    */
   it('should return saved deals', () => {
-    storage.onDealAdded({id: '1'});
-    storage.onDealAdded({id: '2'});
-    storage.onDealAdded({id: '3'});
-    storage.deals.should.match([{id: '1'}, {id: '2'}, {id: '3'}]);
+    storage.onDealAdded({id: '1', time: new Date('2020-01-01T00:00:00.000Z')});
+    storage.onDealAdded({id: '3', time: new Date('2020-01-03T00:00:00.000Z')});
+    storage.onDealAdded({id: '2', time: new Date('2020-01-02T00:00:00.000Z')});
+    storage.deals.should.match([
+      {id: '1', time: new Date('2020-01-01T00:00:00.000Z')},
+      {id: '2', time: new Date('2020-01-02T00:00:00.000Z')},
+      {id: '3', time: new Date('2020-01-03T00:00:00.000Z')}
+    ]);
   });
 
   /**
    * @test {MemoryHistoryStorage#historyOrders}
    */
   it('should return saved historyOrders', () => {
-    storage.onHistoryOrderAdded({id: '1'});
-    storage.onHistoryOrderAdded({id: '2'});
-    storage.onHistoryOrderAdded({id: '3'});
-    storage.historyOrders.should.match([{id: '1'}, {id: '2'}, {id: '3'}]);
+    storage.onHistoryOrderAdded({id: '1', doneTime: new Date('2020-01-01T00:00:00.000Z')});
+    storage.onHistoryOrderAdded({id: '3', doneTime: new Date('2020-01-03T00:00:00.000Z')});
+    storage.onHistoryOrderAdded({id: '2', doneTime: new Date('2020-01-02T00:00:00.000Z')});
+    storage.historyOrders.should.match([
+      {id: '1', doneTime: new Date('2020-01-01T00:00:00.000Z')},
+      {id: '2', doneTime: new Date('2020-01-02T00:00:00.000Z')},
+      {id: '3', doneTime: new Date('2020-01-03T00:00:00.000Z')}
+    ]);
   });
 
   /**

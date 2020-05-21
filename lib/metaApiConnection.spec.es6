@@ -631,4 +631,17 @@ describe('MetaApiConnection', () => {
       new Date('2020-01-02T00:00:00.000Z'));
   });
 
+  /**
+   * @test {MetaApiConnection#close}
+   */
+  it('should unsubscribe from events on cloes', async () => {
+    sandbox.stub(client, 'addSynchronizationListener').returns();
+    sandbox.stub(client, 'removeSynchronizationListener').returns();
+    api = new MetaApiConnection(client, {id: 'accountId', synchronizationMode: 'user'});
+    api.close();
+    sinon.assert.calledWith(client.removeSynchronizationListener, 'accountId', api);
+    sinon.assert.calledWith(client.removeSynchronizationListener, 'accountId', api.terminalState);
+    sinon.assert.calledWith(client.removeSynchronizationListener, 'accountId', api.historyStorage);
+  });
+
 });

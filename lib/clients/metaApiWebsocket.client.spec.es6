@@ -430,6 +430,21 @@ describe('MetaApiWebsocketClient', () => {
     requestReceived.should.be.true();
   });
 
+  /**
+   * @test {MetaApiWebsocketClient#subscribe}
+   */
+  it('should subscribe to MetaTrader terminal events', async () => {
+    let requestReceived = false;
+    server.on('request', data => {
+      if (data.type === 'subscribe' && data.accountId === 'accountId') {
+        requestReceived = true;
+        server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId});
+      }
+    });
+    await client.subscribe('accountId');
+    requestReceived.should.be.true();
+  });
+
   describe('error handling', () => {
 
     /**

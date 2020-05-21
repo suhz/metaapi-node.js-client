@@ -442,4 +442,15 @@ export default class MetaApiConnection extends SynchronizationListener {
     }
   }
 
+  /**
+   * Closes the connection. The instance of the class should no longer be used after this method is invoked.
+   */
+  close() {
+    if (this._account.synchronizationMode === 'user') {
+      this._websocketClient.removeSynchronizationListener(this._account.id, this);
+      this._websocketClient.removeSynchronizationListener(this._account.id, this._terminalState);
+      this._websocketClient.removeSynchronizationListener(this._account.id, this._historyStorage);
+    }
+  }
+
 }
