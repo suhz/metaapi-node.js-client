@@ -198,10 +198,14 @@ connection.close();
 api.close();
 ```
 
-Tags: MetaTrader API, MetaTrader REST API, MetaTrader websocket API,
+Keywords: MetaTrader API, MetaTrader REST API, MetaTrader websocket API,
 MetaTrader 5 API, MetaTrader 5 REST API, MetaTrader 5 websocket API,
 MetaTrader 4 API, MetaTrader 4 REST API, MetaTrader 4 websocket API,
 MT5 API, MT5 REST API, MT5 websocket API, MT4 API, MT4 REST API,
 MT4 websocket API, MetaTrader SDK, MetaTrader SDK, MT4 SDK, MT5 SDK,
 MetaTrader 5 SDK, MetaTrader 4 SDK, MetaTrader node.js SDK, MetaTrader 5
-node.js SDK, MetaTrader 4 node.js SDK, MT5 node.js SDK, MT4 node.js SDK
+node.js SDK, MetaTrader 4 node.js SDK, MT5 node.js SDK, MT4 node.js SDK,
+FX REST API, Forex REST API, Forex websocket API, FX websocket API, FX
+SDK, Forex SDK, FX node.js SDK, Forex node.js SDK, Trading API, Forex
+API, FX API, Trading SDK, Trading REST API, Trading websocket API,
+Trading SDK, Trading node.js SDK

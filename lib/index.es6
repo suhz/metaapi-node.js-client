@@ -52,5 +52,4 @@ export default class MetaApi {
   
 }
 
-export class HistoryStorage;
-export class SynchronizationListener;
+export {HistoryStorage, SynchronizationListener};
