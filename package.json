@@ -30,13 +30,13 @@
     "sdk"
   ],
   "name": "metaapi.cloud-sdk",
-  "description": "Professional MetaTrader 4 and MetaTrader 5 API (forex trading API for MT4 and MT5) which includes MetaTrader REST API and MetaTrader websocket API (https://metaapi.cloud)",
+  "description": "SDK for MetaApi, a professional cloud MetaTrader API which includes MetaTrader REST API and MetaTrader websocket API. Supports both MetaTrader 5 (MT5) and MetaTrader 4 (MT4). (https://metaapi.cloud)",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/agiliumtrade-ai/metaapi-node.js-client.git"
   },
-  "version": "1.0.4",
+  "version": "1.0.5",
   "dependencies": {
     "babel-runtime": "~6.26.0",
     "randomstring": "~1.1.5",
