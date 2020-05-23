@@ -570,20 +570,19 @@ export default class MetaApiWebsocketClient {
   }
 
   _convertIsoTimeToDate(packet) {
+    // eslint-disable-next-line guard-for-in
     for (let field in packet) {
-      if (packet.hasOwnProperty(field)) {
-        let value = packet[field];
-        if (typeof value === 'string' && field.match(/time|Time/)) {
-          packet[field] = new Date(value);
+      let value = packet[field];
+      if (typeof value === 'string' && field.match(/time|Time/)) {
+        packet[field] = new Date(value);
+      }
+      if (Array.isArray(value)) {
+        for (let item of value) {
+          this._convertIsoTimeToDate(item);
         }
-        if (Array.isArray(value)) {
-          for (let item of value) {
-            this._convertIsoTimeToDate(item);
-          }
-        }
-        if (typeof value === 'object') {
-          this._convertIsoTimeToDate(value);
-        }
+      }
+      if (typeof value === 'object') {
+        this._convertIsoTimeToDate(value);
       }
     }
   }

@@ -23,7 +23,7 @@ describe('ProvisioningProfileApi', () => {
 
   before(() => {
     api = new ProvisioningProfileApi(client);
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {

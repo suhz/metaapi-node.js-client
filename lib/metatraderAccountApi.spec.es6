@@ -31,7 +31,7 @@ describe('MetatraderAccountApi', () => {
 
   before(() => {
     api = new MetatraderAccountApi(client, metaApiWebsocketClient);
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
