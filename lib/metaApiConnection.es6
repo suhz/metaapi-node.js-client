@@ -373,15 +373,16 @@ export default class MetaApiConnection extends SynchronizationListener {
 
   /**
    * Requests the terminal to start synchronization process. Use it if user synchronization mode is set to user for the
-   * account (see https://metaapi.cloud/docs/client/websocket/synchronizing/synchronize/).
-   * @param {Date} startingHistoryOrderTime from what date to start synchronizing history orders from. If not specified,
-   * the entire order history will be downloaded.
-   * @param {Date} startingDealTime from what date to start deal synchronization from. If not specified, then all
-   * history deals will be downloaded.
+   * account (see https://metaapi.cloud/docs/client/websocket/synchronizing/synchronize/). Use only for user
+   * synchronization mode.
    * @returns {Promise} promise which resolves when synchronization started
    */
-  synchronize(startingHistoryOrderTime, startingDealTime) {
-    return this._websocketClient.synchronize(this._account.id, startingHistoryOrderTime, startingDealTime);
+  async synchronize() {
+    if (this._account.synchronizationMode === 'user') {
+      let startingHistoryOrderTime = await this._historyStorage.lastHistoryOrderTime();
+      let startingDealTime = await this._historyStorage.lastDealTime();
+      return this._websocketClient.synchronize(this._account.id, startingHistoryOrderTime, startingDealTime);
+    }
   }
 
   /**
@@ -435,11 +436,7 @@ export default class MetaApiConnection extends SynchronizationListener {
    * @return {Promise} promise which resolves when the asynchronous event is processed
    */
   async onConnected() {
-    if (this._account.synchronizationMode === 'user') {
-      let startingHistoryOrderTime = await this._historyStorage.lastHistoryOrderTime;
-      let startingDealTime = await this._historyStorage.lastDealTime;
-      return this._websocketClient.synchronize(this._account.id, startingHistoryOrderTime, startingDealTime);
-    }
+    await this.synchronize();
   }
 
   /**

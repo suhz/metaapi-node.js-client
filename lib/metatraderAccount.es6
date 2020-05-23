@@ -254,8 +254,16 @@ export default class MetatraderAccount {
    * @param {HistoryStorage} optional history storage
    * @returns {MetaApiConnection} MetaApi connection
    */
-  connect(historyStorage) {
-    return new MetaApiConnection(this._metaApiWebsocketClient, this, historyStorage);
+  async connect(historyStorage) {
+    let connection = new MetaApiConnection(this._metaApiWebsocketClient, this, historyStorage);
+    try {
+      await connection.onConnected();
+    } catch (err) {
+      if (!err.name === 'NotConnectedError') {
+        throw err;
+      }
+    }
+    return connection;
   }
 
   _delay(timeoutInMilliseconds) {

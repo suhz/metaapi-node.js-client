@@ -79,7 +79,7 @@ const api = new MetaApi(token);
 
 const account = await api.metatraderAccountApi.getAccount('accountId');
 
-const connection = account.connect();
+const connection = await account.connect();
 
 // retrieve balance and equity
 console.log(await connection.getAccountInformation());
@@ -155,7 +155,7 @@ const historyStorage = new MongodbHistoryStorage();
 
 // Note: if you will not specify history storage, then in-memory storage
 // will be used (instalce of MemoryHistoryStorage)
-const connection = account.connect(historyStorage);
+const connection = await account.connect(historyStorage);
 
 // access local copy of terminal state
 const terminalState = connection.terminalState;

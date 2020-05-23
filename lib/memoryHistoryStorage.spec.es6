@@ -26,7 +26,7 @@ describe('MemoryHistoryStorage', () => {
     storage.onHistoryOrderAdded({});
     storage.onHistoryOrderAdded({doneTime: new Date('2020-01-01T00:00:00.000Z')});
     storage.onHistoryOrderAdded({doneTime: new Date('2020-01-02T00:00:00.000Z')});
-    storage.lastHistoryOrderTime.should.match(new Date('2020-01-02T00:00:00.000Z'));
+    storage.lastHistoryOrderTime().should.match(new Date('2020-01-02T00:00:00.000Z'));
   });
 
   /**
@@ -36,7 +36,7 @@ describe('MemoryHistoryStorage', () => {
     storage.onDealAdded({});
     storage.onDealAdded({time: new Date('2020-01-01T00:00:00.000Z')});
     storage.onDealAdded({time: new Date('2020-01-02T00:00:00.000Z')});
-    storage.lastDealTime.should.match(new Date('2020-01-02T00:00:00.000Z'));
+    storage.lastDealTime().should.match(new Date('2020-01-02T00:00:00.000Z'));
   });
 
   /**

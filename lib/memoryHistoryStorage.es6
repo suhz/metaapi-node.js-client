@@ -28,7 +28,7 @@ export default class MemoryHistoryStorage extends HistoryStorage {
    * Returns the time of the last history order record stored in the history storage
    * @returns {Date} the time of the last history order record stored in the history storage
    */
-  get lastHistoryOrderTime() {
+  lastHistoryOrderTime() {
     return new Date(this._historyOrders.reduce((max, o) => Math.max(max, (o.doneTime || new Date(0)).getTime()), 0));
   }
 
@@ -36,7 +36,7 @@ export default class MemoryHistoryStorage extends HistoryStorage {
    * Returns the time of the last history deal record stored in the history storage
    * @returns {Date} the time of the last history deal record stored in the history storage
    */
-  get lastDealTime() {
+  lastDealTime() {
     return new Date(this._deals.reduce((max, d) => Math.max(max, (d.time || new Date(0)).getTime()), 0));
   }
 

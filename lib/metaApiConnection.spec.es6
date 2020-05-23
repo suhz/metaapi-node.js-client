@@ -567,10 +567,12 @@ describe('MetaApiConnection', () => {
    */
   it('should synchronize state with terminal', async () => {
     sandbox.stub(client, 'synchronize').resolves();
-    let historyOrderStartTime = new Date(Date.now() - 1000);
-    let dealStartTime = new Date();
-    await api.synchronize(historyOrderStartTime, dealStartTime);
-    sinon.assert.calledWith(client.synchronize, 'accountId', historyOrderStartTime, dealStartTime);
+    api = new MetaApiConnection(client, {id: 'accountId', synchronizationMode: 'user'});
+    api.historyStorage.onHistoryOrderAdded({doneTime: new Date('2020-01-01T00:00:00.000Z')});
+    api.historyStorage.onDealAdded({time: new Date('2020-01-02T00:00:00.000Z')});
+    await api.synchronize();
+    sinon.assert.calledWith(client.synchronize, 'accountId', new Date('2020-01-01T00:00:00.000Z'),
+      new Date('2020-01-02T00:00:00.000Z'));
   });
 
   /**

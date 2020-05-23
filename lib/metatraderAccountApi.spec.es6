@@ -25,7 +25,8 @@ describe('MetatraderAccountApi', () => {
     redeployAccount: () => {}
   };
   let metaApiWebsocketClient = {
-    addSynchronizationListener: () => {}
+    addSynchronizationListener: () => {},
+    synchronize: () => {}
   };
 
   before(() => {
@@ -637,15 +638,21 @@ describe('MetatraderAccountApi', () => {
   /**
    * @test {MetatraderAccount#connect}
    */
-  it('should retrieve MT accounts', async () => {
+  it('should connect to an MT terminal', async () => {
     sandbox.stub(metaApiWebsocketClient, 'addSynchronizationListener').returns();
+    sandbox.stub(metaApiWebsocketClient, 'synchronize').resolves();
     sandbox.stub(client, 'getAccount').resolves({_id: 'id', synchronizationMode: 'user'});
     let account = await api.getAccount();
-    let storage = {};
-    let connection = account.connect(storage);
+    let storage = {
+      lastHistoryOrderTime: () => new Date('2020-01-01T00:00:00.000Z'),
+      lastDealTime: () => new Date('2020-01-02T00:00:00.000Z')
+    };
+    let connection = await account.connect(storage);
     (connection instanceof MetaApiConnection).should.be.true();
     connection.historyStorage.should.equal(storage);
     sinon.assert.calledWith(metaApiWebsocketClient.addSynchronizationListener, 'id', storage);
+    sinon.assert.calledWith(metaApiWebsocketClient.synchronize, 'id', new Date('2020-01-01T00:00:00.000Z'),
+      new Date('2020-01-02T00:00:00.000Z'));
   });
 
 });

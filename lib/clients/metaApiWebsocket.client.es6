@@ -467,13 +467,27 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
-   * Subscribes to specific MetaTrader account (see
-   * https://metaapi.cloud/docs/client/websocket/api/subscribe/).
-   * @param {String} accountId id of the MetaTrader account to subscribe to
-   * @returns {Promise} promise which resolves when subscription request was processed
+   * Retrieves specification for a symbol (see
+   * https://metaapi.cloud/docs/client/websocket/api/getSpecification/).
+   * @param {String} accountId id of the MetaTrader account to retrieve symbol specification for
+   * @param {String} symbol symbol to retrieve specification for
+   * @returns {Promise} promise which resolves when specification is retrieved
    */
-  subscribe(accountId) {
-    return this._rpcRequest(accountId, {type: 'subscribe'});
+  async getSymbolSpecification(accountId, symbol) {
+    let response = await this._rpcRequest(accountId, {type: 'getSymbolSpecification', symbol});
+    return response.specification;
+  }
+
+  /**
+   * Retrieves price for a symbol (see
+   * https://metaapi.cloud/docs/client/websocket/api/getPrice/).
+   * @param {String} accountId id of the MetaTrader account to retrieve symbol price for
+   * @param {String} symbol symbol to retrieve price for
+   * @returns {Promise} promise which resolves when price is retrieved
+   */
+  async getPrice(accountId, symbol) {
+    let response = await this._rpcRequest(accountId, {type: 'getPrice', symbol});
+    return response.price;
   }
 
   /**

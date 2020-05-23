@@ -431,18 +431,44 @@ describe('MetaApiWebsocketClient', () => {
   });
 
   /**
-   * @test {MetaApiWebsocketClient#subscribe}
+   * @test {MetaApiWebsocketClient#getSymbolSpecification}
    */
-  it('should subscribe to MetaTrader terminal events', async () => {
-    let requestReceived = false;
+  it('should retrieve symbol specification from API', async () => {
+    let specification = {
+      symbol: 'AUDNZD',
+      tickSize: 0.00001,
+      minVolume: 0.01,
+      maxVolume: 100,
+      volumeStep: 0.01
+    };
     server.on('request', data => {
-      if (data.type === 'subscribe' && data.accountId === 'accountId') {
-        requestReceived = true;
-        server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId});
+      if (data.type === 'getSymbolSpecification' && data.accountId === 'accountId' && data.symbol === 'AUDNZD') {
+        server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId,
+          specification});
       }
     });
-    await client.subscribe('accountId');
-    requestReceived.should.be.true();
+    let actual = await client.getSymbolSpecification('accountId', 'AUDNZD');
+    actual.should.match(specification);
+  });
+
+  /**
+   * @test {MetaApiWebsocketClient#getPrice}
+   */
+  it('should retrieve symbol price from API', async () => {
+    let price = {
+      symbol: 'AUDNZD',
+      bid: 1.05297,
+      ask: 1.05309,
+      profitTickValue: 0.59731,
+      lossTickValue: 0.59736
+    };
+    server.on('request', data => {
+      if (data.type === 'getPrice' && data.accountId === 'accountId' && data.symbol === 'AUDNZD') {
+        server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId, price});
+      }
+    });
+    let actual = await client.getPrice('accountId', 'AUDNZD');
+    actual.should.match(price);
   });
 
   describe('error handling', () => {

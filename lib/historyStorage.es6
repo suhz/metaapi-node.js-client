@@ -40,13 +40,13 @@ export default class HistoryStorage extends SynchronizationListener {
    * Returns the time of the last history order record stored in the history storage
    * @returns {Date} the time of the last history order record stored in the history storage
    */
-  get lastHistoryOrderTime() {}
+  async lastHistoryOrderTime() {}
 
   /**
    * Returns the time of the last history deal record stored in the history storage
    * @returns {Date} the time of the last history deal record stored in the history storage
    */
-  get lastDealTime() {}
+  async lastDealTime() {}
 
   /**
    * Invoked when a new MetaTrader history order is added
