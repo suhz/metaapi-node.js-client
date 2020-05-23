@@ -3,7 +3,7 @@
 MetaApi is a powerful API for MetaTrader 4 and MetaTrader 5 terminals.
 MetaApi is available in cloud and self-hosted options.
 
-Official documentation: (https://metaapi.cloud/docs/client/)[https://metaapi.cloud/docs/client/]
+Official documentation: [https://metaapi.cloud/docs/client/](https://metaapi.cloud/docs/client/)
 
 ## Installation
 ```bash
@@ -11,10 +11,10 @@ npm install --save metaapi.cloud-sdk
 ```
 
 ## Obtaining MetaApi token
-You can obtain MetaApi token via https://app.metaapi.cloud/token UI.
+You can obtain MetaApi token via [https://app.metaapi.cloud/token](https://app.metaapi.cloud/token) UI.
 
 ## Add MetaTrader account to MetaApi
-You can use (https://app.metaapi.cloud/accounts)[https://app.metaapi.cloud/accounts] UI to add a MetaTrader
+You can use [https://app.metaapi.cloud/accounts](https://app.metaapi.cloud/accounts) UI to add a MetaTrader
 account to MetaApi application. Alternatively you can use API as
 demonstrated below.
 
