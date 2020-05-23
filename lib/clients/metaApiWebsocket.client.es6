@@ -467,8 +467,7 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
-   * Retrieves specification for a symbol (see
-   * https://metaapi.cloud/docs/client/websocket/api/getSpecification/).
+   * Retrieves specification for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolSpecification/).
    * @param {String} accountId id of the MetaTrader account to retrieve symbol specification for
    * @param {String} symbol symbol to retrieve specification for
    * @returns {Promise} promise which resolves when specification is retrieved
@@ -479,14 +478,13 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
-   * Retrieves price for a symbol (see
-   * https://metaapi.cloud/docs/client/websocket/api/getPrice/).
+   * Retrieves price for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolPrice/).
    * @param {String} accountId id of the MetaTrader account to retrieve symbol price for
    * @param {String} symbol symbol to retrieve price for
    * @returns {Promise} promise which resolves when price is retrieved
    */
-  async getPrice(accountId, symbol) {
-    let response = await this._rpcRequest(accountId, {type: 'getPrice', symbol});
+  async getSymbolPrice(accountId, symbol) {
+    let response = await this._rpcRequest(accountId, {type: 'getSymbolPrice', symbol});
     return response.price;
   }
 

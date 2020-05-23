@@ -29,7 +29,9 @@ describe('MetaApiConnection', () => {
     synchronize: () => {},
     subscribeToMarketData: () => {},
     addSynchronizationListener: () => {},
-    removeSynchronizationListener: () => {}
+    removeSynchronizationListener: () => {},
+    getSymbolSpecification: () => {},
+    getSymbolPrice: () => {}
   };
 
   before(() => {
@@ -582,6 +584,40 @@ describe('MetaApiConnection', () => {
     sandbox.stub(client, 'subscribeToMarketData').resolves();
     await api.subscribeToMarketData('EURUSD');
     sinon.assert.calledWith(client.subscribeToMarketData, 'accountId', 'EURUSD');
+  });
+
+  /**
+   * @test {MetaApiConnection#getSymbolSpecification}
+   */
+  it('should retrieve symbol specification', async () => {
+    let specification = {
+      symbol: 'AUDNZD',
+      tickSize: 0.00001,
+      minVolume: 0.01,
+      maxVolume: 100,
+      volumeStep: 0.01
+    };
+    sandbox.stub(client, 'getSymbolSpecification').resolves(specification);
+    let actual = await api.getSymbolSpecification('AUDNZD');
+    actual.should.match(specification);
+    sinon.assert.calledWith(client.getSymbolSpecification, 'accountId', 'AUDNZD');
+  });
+
+  /**
+   * @test {MetaApiConnection#getSymbolPrice}
+   */
+  it('should retrieve symbol price', async () => {
+    let price = {
+      symbol: 'AUDNZD',
+      bid: 1.05297,
+      ask: 1.05309,
+      profitTickValue: 0.59731,
+      lossTickValue: 0.59736
+    };
+    sandbox.stub(client, 'getSymbolPrice').resolves(price);
+    let actual = await api.getSymbolPrice('AUDNZD');
+    actual.should.match(price);
+    sinon.assert.calledWith(client.getSymbolPrice, 'accountId', 'AUDNZD');
   });
 
   /**

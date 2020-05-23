@@ -396,6 +396,24 @@ export default class MetaApiConnection extends SynchronizationListener {
   }
 
   /**
+   * Retrieves specification for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolSpecification/).
+   * @param {String} symbol symbol to retrieve specification for
+   * @returns {Promise} promise which resolves when specification is retrieved
+   */
+  getSymbolSpecification(symbol) {
+    return this._websocketClient.getSymbolSpecification(this._account.id, symbol);
+  }
+
+  /**
+   * Retrieves specification for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolPrice/).
+   * @param {String} symbol symbol to retrieve price for
+   * @returns {Promise} promise which resolves when price is retrieved
+   */
+  getSymbolPrice(symbol) {
+    return this._websocketClient.getSymbolPrice(this._account.id, symbol);
+  }
+
+  /**
    * Returns local copy of terminal state. Use this method for accounts in user synchronization mode
    * @returns {TerminalState} local copy of terminal state
    */

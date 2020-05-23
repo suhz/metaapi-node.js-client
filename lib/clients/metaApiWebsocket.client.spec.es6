@@ -452,7 +452,7 @@ describe('MetaApiWebsocketClient', () => {
   });
 
   /**
-   * @test {MetaApiWebsocketClient#getPrice}
+   * @test {MetaApiWebsocketClient#getSymbolPrice}
    */
   it('should retrieve symbol price from API', async () => {
     let price = {
@@ -463,11 +463,11 @@ describe('MetaApiWebsocketClient', () => {
       lossTickValue: 0.59736
     };
     server.on('request', data => {
-      if (data.type === 'getPrice' && data.accountId === 'accountId' && data.symbol === 'AUDNZD') {
+      if (data.type === 'getSymbolPrice' && data.accountId === 'accountId' && data.symbol === 'AUDNZD') {
         server.emit('response', {type: 'response', accountId: data.accountId, requestId: data.requestId, price});
       }
     });
-    let actual = await client.getPrice('accountId', 'AUDNZD');
+    let actual = await client.getSymbolPrice('accountId', 'AUDNZD');
     actual.should.match(price);
   });
 
