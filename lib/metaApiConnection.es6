@@ -396,7 +396,8 @@ export default class MetaApiConnection extends SynchronizationListener {
   }
 
   /**
-   * Retrieves specification for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolSpecification/).
+   * Retrieves specification for a symbol (see
+   * https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolSpecification/).
    * @param {String} symbol symbol to retrieve specification for
    * @returns {Promise} promise which resolves when specification is retrieved
    */
@@ -405,7 +406,8 @@ export default class MetaApiConnection extends SynchronizationListener {
   }
 
   /**
-   * Retrieves specification for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolPrice/).
+   * Retrieves specification for a symbol (see
+   * https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolPrice/).
    * @param {String} symbol symbol to retrieve price for
    * @returns {Promise} promise which resolves when price is retrieved
    */

@@ -467,7 +467,8 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
-   * Retrieves specification for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolSpecification/).
+   * Retrieves specification for a symbol (see
+   * https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolSpecification/).
    * @param {String} accountId id of the MetaTrader account to retrieve symbol specification for
    * @param {String} symbol symbol to retrieve specification for
    * @returns {Promise} promise which resolves when specification is retrieved
@@ -478,7 +479,8 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
-   * Retrieves price for a symbol (see https://metaapi.cloud/docs/client/websocket/api/getSymbolPrice/).
+   * Retrieves price for a symbol (see
+   * https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolPrice/).
    * @param {String} accountId id of the MetaTrader account to retrieve symbol price for
    * @param {String} symbol symbol to retrieve price for
    * @returns {Promise} promise which resolves when price is retrieved
