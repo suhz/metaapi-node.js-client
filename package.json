@@ -26,6 +26,8 @@
     "forex",
     "trading",
     "API",
+    "REST",
+    "websocket",
     "client",
     "sdk"
   ],
@@ -36,7 +38,7 @@
     "type": "git",
     "url": "https://github.com/agiliumtrade-ai/metaapi-node.js-client.git"
   },
-  "version": "1.0.5",
+  "version": "1.0.6",
   "dependencies": {
     "babel-runtime": "~6.26.0",
     "randomstring": "~1.1.5",
