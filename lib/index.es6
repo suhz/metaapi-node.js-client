@@ -7,7 +7,7 @@ import HttpClient from './clients/httpClient';
 import MetatraderAccountClient from './clients/metatraderAccount.client';
 import MetatraderAccountApi from './metatraderAccountApi';
 import HistoryStorage from './historyStorage';
-import SynchronizationListener from './client/synchronizationListener';
+import SynchronizationListener from './clients/synchronizationListener';
 
 /**
  * MetaApi MetaTrader API SDK
