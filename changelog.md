@@ -1,3 +1,5 @@
+1.0.11
+  - fixed WS API url
 1.0.10
   - fixed code examples in readme.md
 1.0.9
