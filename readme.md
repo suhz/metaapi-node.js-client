@@ -86,21 +86,21 @@ console.log(await connection.getAccountInformation());
 // retrieve open positions
 console.log(await connection.getPositions());
 // retrieve a position by id
-console.log(await connection.getPosition('1234567');
+console.log(await connection.getPosition('1234567'));
 // retrieve pending orders
 console.log(await connection.getOrders());
 // retrieve a pending order by id
-console.log(await connection.getOrder('1234567');
+console.log(await connection.getOrder('1234567'));
 // retrieve history orders by ticket
-console.log(await connection.getHistoryOrdersByTicket('1234567');
+console.log(await connection.getHistoryOrdersByTicket('1234567'));
 // retrieve history orders by position id
-console.log(await connection.getHistoryOrdersByPosition('1234567');
+console.log(await connection.getHistoryOrdersByPosition('1234567'));
 // retrieve history orders by time range
 console.log(await connection.getHistoryOrdersByTimeRange(startTime, endTime));
 // retrieve history deals by ticket
-console.log(await connection.getDealsByTicket('1234567');
+console.log(await connection.getDealsByTicket('1234567'));
 // retrieve history deals by position id
-console.log(await connection.getDealsByPosition('1234567');
+console.log(await connection.getDealsByPosition('1234567'));
 // retrieve history deals by time range
 console.log(await connection.getDealsByTimeRange(startTime, endTime));
 
@@ -137,7 +137,7 @@ the case, then you should set your account synchronization mode to
 'user' and use API below to access terminal state.
 
 ```javascript
-import {MetaApi, HistoryStorage, SynchronizationListener} from 'metaapi.cloud-sdk';
+import MetaApi, {HistoryStorage, SynchronizationListener} from 'metaapi.cloud-sdk';
 
 const token = '...';
 const api = new MetaApi(token);
