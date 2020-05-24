@@ -18,7 +18,7 @@ export default class MetaApiWebsocketClient {
    * @param {String} domain domain to connect to, default is agiliumtrade.agiliumtrade.ai
    */
   constructor(token, domain = 'agiliumtrade.agiliumtrade.ai') {
-    this._url = `https://mt-provisioning-api-v1.${domain}`;
+    this._url = `https://mt-client-api-v1.${domain}`;
     this._token = token;
     this._requestResolves = {};
     this._synchronizationListeners = {};
