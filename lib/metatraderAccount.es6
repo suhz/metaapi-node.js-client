@@ -128,13 +128,16 @@ export default class MetatraderAccount {
   }
 
   /**
-   * Removes MetaTrader account and transitiond it to DELETING state. It takes some time for an account to be eventually
-   * deleted.
+   * Removes MetaTrader account. Cloud account transitions to DELETING state. 
+   * It takes some time for an account to be eventually deleted. Self-hosted 
+   * account is deleted immediately.
    * @return {Promise} promise resolving when account is scheduled for deletion
    */
   async remove() {
     await this._metatraderAccountClient.deleteAccount(this.id);
-    await this.reload();
+    if (this.type !== 'self-hosted') {
+      await this.reload();
+    }
   }
 
   /**
