@@ -7,6 +7,7 @@ import HttpClient from './clients/httpClient';
 import MetatraderAccountClient from './clients/metatraderAccount.client';
 import MetatraderAccountApi from './metatraderAccountApi';
 import HistoryStorage from './historyStorage';
+import MemoryHistoryStorage from './memoryHistoryStorage';
 import SynchronizationListener from './clients/synchronizationListener';
 
 /**
@@ -52,4 +53,4 @@ export default class MetaApi {
   
 }
 
-export {HistoryStorage, SynchronizationListener};
+export {HistoryStorage, SynchronizationListener, MemoryHistoryStorage};

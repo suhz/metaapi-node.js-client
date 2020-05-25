@@ -1,3 +1,5 @@
+1.0.12
+  - add MemoryHistoryStorage to exports
 1.0.11
   - fixed WS API url
 1.0.10
