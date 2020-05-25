@@ -386,6 +386,14 @@ export default class MetaApiConnection extends SynchronizationListener {
   }
 
   /**
+   * Initiates subscription to MetaTrader terminal
+   * @returns {Promise} promise which resolves when subscription is initiated
+   */
+  async subscribe() {
+    return this._websocketClient.subscribe(this._account.id);
+  }
+
+  /**
    * Subscribes on market data of specified symbol (see
    * https://metaapi.cloud/docs/client/websocket/marketDataStreaming/subscribeToMarketData/).
    * @param {String} symbol symbol (e.g. currency pair or an index)

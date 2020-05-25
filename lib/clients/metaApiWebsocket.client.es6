@@ -433,6 +433,15 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
+   * Subscribes to the Metatrader terminal events (see https://metaapi.cloud/docs/client/websocket/api/subscribe/).
+   * @param {String} accountId id of the MetaTrader account to subscribe to
+   * @returns {Promise} promise which resolves when subscription started
+   */
+  subscribe(accountId) {
+    return this._rpcRequest(accountId, {type: 'subscribe'});
+  }
+
+  /**
    * Reconnects to the Metatrader terminal (see https://metaapi.cloud/docs/client/websocket/api/reconnect/).
    * @param {String} accountId id of the MetaTrader account to reconnect
    * @returns {Promise} promise which resolves when reconnection started

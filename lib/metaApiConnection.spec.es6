@@ -7,6 +7,7 @@ import MetaApiConnection from './metaApiConnection';
 /**
  * @test {MetaApiConnection}
  */
+// eslint-disable-next-line max-statements
 describe('MetaApiConnection', () => {
 
   let sandbox;
@@ -27,6 +28,7 @@ describe('MetaApiConnection', () => {
     trade: () => {},
     reconnect: () => {},
     synchronize: () => {},
+    subscribe: () => {},
     subscribeToMarketData: () => {},
     addSynchronizationListener: () => {},
     removeSynchronizationListener: () => {},
@@ -562,6 +564,15 @@ describe('MetaApiConnection', () => {
     sandbox.stub(client, 'reconnect').resolves();
     await api.reconnect();
     sinon.assert.calledWith(client.reconnect, 'accountId');
+  });
+
+  /**
+   * @test {MetaApiConnection#connect}
+   */
+  it('should subscribe to terminal', async () => {
+    sandbox.stub(client, 'subscribe').resolves();
+    await api.subscribe();
+    sinon.assert.calledWith(client.subscribe, 'accountId');
   });
 
   /**

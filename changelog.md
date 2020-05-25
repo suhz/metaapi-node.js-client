@@ -1,9 +1,15 @@
+1.0.13
+  - change websocket client subscription protocol
+
 1.0.12
   - add MemoryHistoryStorage to exports
+
 1.0.11
   - fixed WS API url
+
 1.0.10
   - fixed code examples in readme.md
+
 1.0.9
   - fixed import in index.es6
   - fixed logic of self-hosted account deletion
