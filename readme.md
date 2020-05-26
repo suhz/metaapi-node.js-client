@@ -3,7 +3,10 @@
 MetaApi is a powerful API for MetaTrader 4 and MetaTrader 5 terminals.
 MetaApi is available in cloud and self-hosted options.
 
-Official documentation: [https://metaapi.cloud/docs/client/](https://metaapi.cloud/docs/client/)
+Official REST and websocket API documentation: [https://metaapi.cloud/docs/client/](https://metaapi.cloud/docs/client/)
+
+Please note that this SDK provides an abstraction over REST and websocket API to simplify your application logic.
+For more information about SDK APIs please check esdoc documentation in source codes located inside lib folder of this npm package.
 
 ## Installation
 ```bash

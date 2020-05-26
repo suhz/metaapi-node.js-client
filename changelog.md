@@ -1,3 +1,6 @@
+1.0.15
+  - added clarifications to readme.md regarding SDK documentation
+
 1.0.14
   - add MetaApiConnection.waitSynchronized API to wait until terminal state synchronization has completed. Should be used for accounts in use synchronization mode.
 

@@ -5,3 +5,4 @@ node_modules
 .npmrc
 npm-debug.log
 package-lock.json
+.git
