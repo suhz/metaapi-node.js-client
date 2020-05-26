@@ -41,7 +41,7 @@ describe('MetaApiConnection', () => {
   });
 
   beforeEach(() => {
-    api = new MetaApiConnection(client, {id: 'accountId'});
+    api = new MetaApiConnection(client, {id: 'accountId', synchronizationMode: 'user'});
   });
 
   afterEach(() => {
@@ -683,7 +683,7 @@ describe('MetaApiConnection', () => {
   /**
    * @test {MetaApiConnection#close}
    */
-  it('should unsubscribe from events on cloes', async () => {
+  it('should unsubscribe from events on close', async () => {
     sandbox.stub(client, 'addSynchronizationListener').returns();
     sandbox.stub(client, 'removeSynchronizationListener').returns();
     api = new MetaApiConnection(client, {id: 'accountId', synchronizationMode: 'user'});
@@ -691,6 +691,39 @@ describe('MetaApiConnection', () => {
     sinon.assert.calledWith(client.removeSynchronizationListener, 'accountId', api);
     sinon.assert.calledWith(client.removeSynchronizationListener, 'accountId', api.terminalState);
     sinon.assert.calledWith(client.removeSynchronizationListener, 'accountId', api.historyStorage);
+  });
+
+  describe('waitSynchronized', () => {
+
+    /**
+     * @test {MetaApiConnection#waitSynchronized}
+     */
+    it('should wait util connection', async () => {
+      api.synchronized.should.equal(false);
+      let promise = api.waitSynchronized(1, 10);
+      let startTime = Date.now();
+      await Promise.race([promise, new Promise(res => setTimeout(res, 50))]);
+      (Date.now() - startTime).should.be.approximately(50, 10);
+      api.onDealSynchronizationFinished();
+      startTime = Date.now();
+      await promise;
+      (Date.now() - startTime).should.be.approximately(0, 10);
+      api.synchronized.should.equal(true);
+    });
+
+    /**
+     * @test {MetaApiConnection#waitSynchronized}
+     */
+    it('should time out waiting for connection', async () => {
+      try {
+        await api.waitSynchronized(1, 10);
+        throw new Error('TimeoutError is expected');
+      } catch (err) {
+        err.name.should.equal('TimeoutError');
+      }
+      api.synchronized.should.equal(false);
+    });
+
   });
 
 });

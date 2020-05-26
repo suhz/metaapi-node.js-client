@@ -160,6 +160,9 @@ const connection = await account.connect(historyStorage);
 // access local copy of terminal state
 const terminalState = connection.terminalState;
 
+// wait until synchronization completed
+await connection.waitSynchronized();
+
 console.log(terminalState.connected);
 console.log(terminalState.connectedToBroker);
 console.log(terminalState.accountInformation);

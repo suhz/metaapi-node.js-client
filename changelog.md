@@ -1,3 +1,6 @@
+1.0.14
+  - add MetaApiConnection.waitSynchronized API to wait until terminal state synchronization has completed. Should be used for accounts in use synchronization mode.
+
 1.0.13
   - change websocket client subscription protocol
 
