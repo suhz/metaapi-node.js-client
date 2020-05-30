@@ -28,6 +28,7 @@ export default class MetaApiConnection extends SynchronizationListener {
       this._websocketClient.addSynchronizationListener(account.id, this);
       this._websocketClient.addSynchronizationListener(account.id, this._terminalState);
       this._websocketClient.addSynchronizationListener(account.id, this._historyStorage);
+      this._websocketClient.addReconnectListener(this);
     }
   }
 
@@ -481,6 +482,14 @@ export default class MetaApiConnection extends SynchronizationListener {
    */
   async onDealSynchronizationFinished() {
     this._synchronized = true;
+  }
+
+  /**
+   * Invoked when connection to MetaApi websocket API restored after a disconnect
+   * @return {Promise} promise which resolves when connection to MetaApi websocket API restored after a disconnect
+   */
+  async onReconnected() {
+    await this.subscribe();
   }
 
   /**

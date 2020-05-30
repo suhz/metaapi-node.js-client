@@ -26,6 +26,7 @@ describe('MetatraderAccountApi', () => {
   };
   let metaApiWebsocketClient = {
     addSynchronizationListener: () => {},
+    addReconnectListener: () => {},
     subscribe: () => {}
   };
 

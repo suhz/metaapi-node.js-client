@@ -31,6 +31,7 @@ describe('MetaApiConnection', () => {
     subscribe: () => {},
     subscribeToMarketData: () => {},
     addSynchronizationListener: () => {},
+    addReconnectListener: () => {},
     removeSynchronizationListener: () => {},
     getSymbolSpecification: () => {},
     getSymbolPrice: () => {}
@@ -567,7 +568,7 @@ describe('MetaApiConnection', () => {
   });
 
   /**
-   * @test {MetaApiConnection#connect}
+   * @test {MetaApiConnection#subscribe}
    */
   it('should subscribe to terminal', async () => {
     sandbox.stub(client, 'subscribe').resolves();
@@ -724,6 +725,15 @@ describe('MetaApiConnection', () => {
       api.synchronized.should.equal(false);
     });
 
+  });
+
+  /**
+   * @test {MetaApiConnection#onReconnected}
+   */
+  it('should subscribe to terminal on reconnect', async () => {
+    sandbox.stub(api, 'subscribe').resolves();
+    await api.onReconnected();
+    sinon.assert.calledWith(api.subscribe);
   });
 
 });

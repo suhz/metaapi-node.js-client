@@ -22,6 +22,7 @@ export default class MetaApiWebsocketClient {
     this._token = token;
     this._requestResolves = {};
     this._synchronizationListeners = {};
+    this._reconnectListeners = {};
   }
 
   /**
@@ -54,16 +55,21 @@ export default class MetaApiWebsocketClient {
         reconnectionDelayMax : 5000,
         reconnectionAttempts: Infinity
       });
-      this._socket.on('connect', () => {
+      this._socket.on('connect', async () => {
         // eslint-disable-next-line no-console
         console.log('[' + (new Date()).toISOString() + '] MetaApi websocket client connected to the MetaApi server');
         if (!resolved) {
           resolved = true;
           resolve();
+        } else {
+          await this._fireReconnected();
         }
         if (!this._connected) {
           this._socket.close();
         }
+      });
+      this._socket.on('reconnect', async () => {
+        await this._fireReconnected();
       });
       this._socket.on('connect_error', (err) => {
         // eslint-disable-next-line no-console
@@ -528,10 +534,27 @@ export default class MetaApiWebsocketClient {
   }
 
   /**
+   * Adds reconnect listener
+   * @param {ReconnectListener} listener reconnect listener to add
+   */
+  addReconnectListener(listener) {
+    this._reconnectListeners.push(listener);
+  }
+
+  /**
+   * Removes reconnect listener
+   * @param {ReconnectListener} listener listener to remove
+   */
+  removeReconnectListener(listener) {
+    this._reconnectListeners = this._reconnectListeners.filter(l => l !== listener);
+  }
+
+  /**
    * Removes all listeners. Intended for use in unit tests.
    */
   removeAllListeners() {
     this._synchronizationListeners = {};
+    this._reconnectListeners = {};
   }
 
   async _reconnect() {
@@ -818,6 +841,17 @@ export default class MetaApiWebsocketClient {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to process incoming synchronization packet', err);
+    }
+  }
+
+  async _fireReconnected() {
+    for (let listener of this._reconnectListeners) {
+      try {
+        await listener.onReconnected();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('[' + (new Date()).toISOString() + '] Failed to notify reconnect listener', err);
+      }
     }
   }
 
