@@ -183,6 +183,7 @@ export default class MetaApiWebsocketClient {
    * https://metaapi.cloud/docs/client/clientIdUsage/
    * @property {Number} unrealizedProfit profit of the part of the position which is not yet closed, including swap
    * @property {Number} realizedProfit profit of the already closed part, including commissions and swap
+   * @property {Number} commission optional position commission
    */
 
   /**
