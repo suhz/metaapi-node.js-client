@@ -1,4 +1,4 @@
-1.0.16
+1.0.17
   - improve stability on reconnect in user synchronization mode
   - added commission field to Metatrader position model
 

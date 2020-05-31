@@ -22,7 +22,7 @@ export default class MetaApiWebsocketClient {
     this._token = token;
     this._requestResolves = {};
     this._synchronizationListeners = {};
-    this._reconnectListeners = {};
+    this._reconnectListeners = [];
   }
 
   /**
