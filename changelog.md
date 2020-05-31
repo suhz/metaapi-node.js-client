@@ -1,5 +1,6 @@
 1.0.16
   - improve stability on reconnect in user synchronization mode
+  - added commission field to Metatrader position model
 
 1.0.15
   - added clarifications to readme.md regarding SDK documentation
