@@ -1,3 +1,8 @@
+🚨 **NOTICE** 🚨
+This is an earlier fork of the original repository and it receives no updates. You can find the latest official version at [metaapi/metaapi-javascript-sdk](https://github.com/metaapi/metaapi-javascript-sdk).
+
+---
+
 # metaapi.cloud SDK for node.js
 
 MetaApi is a powerful API for MetaTrader 4 and MetaTrader 5 terminals.
